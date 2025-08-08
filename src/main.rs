@@ -6,12 +6,11 @@ fn main() {
     let args = std::env::args().collect();
     let mut c = parse_arguments(&args).unwrap_or_else(|err|{println!("User error: {}",err);exit(1)});
     let k = match c.func.as_str(){
-        "enc" => {enc(&c.msg,&mut c.shift)},
-        "dec" => {dec(&c.msg,&mut c.shift)},
+        "enc" => {format!("Secret: {} - *Key:{}",enc(&c.msg,&mut c.shift).join(" "),c.shift) },
+        "dec" => {format!("Message: {}",dec(&c.msg,&mut c.shift).join(" "))},
         _ => {println!("Incorrect Function Type - Encode[enc]/Decode[dec]");exit(1)}
     };
-    let output = k.join(" ");
-    println!("{}",output)
+    println!("{}",k)
 
 }
 
@@ -45,9 +44,14 @@ fn enc(m: &Vec<String>, d: &mut i32) -> Vec<String>{
                 let n = (shift as u8) + b'a';
                 cipher.push((n as char).to_ascii_uppercase());
             }else{
-            let shift = ((c as u8 - b'a') as i32 + *d).rem_euclid(26);
-            let n = (shift as u8) + b'a';
-            cipher.push(n as char);}
+                if c.is_ascii_alphabetic(){
+                    let shift = ((c as u8 - b'a') as i32 + *d).rem_euclid(26);
+                    let n = (shift as u8) + b'a';
+                    cipher.push(n as char);
+                }else{
+                    cipher.push(c);
+                }
+            }
         }
         ciphervec.push(cipher);
     }
@@ -67,9 +71,13 @@ fn dec(c: &Vec<String>, d: &mut i32) -> Vec<String>{
                 let n = (shift as u8) + b'a';
                 message.push((n as char).to_ascii_uppercase());
             }else{
-            let shift = ((c as u8 - b'a') as i32 + *d).rem_euclid(26);
-            let n = (shift as u8) + b'a';
-            message.push(n as char);}
+            if c.is_ascii_alphabetic(){
+                    let shift = ((c as u8 - b'a') as i32 + *d).rem_euclid(26);
+                    let n = (shift as u8) + b'a';
+                    message.push(n as char);
+                }else{
+                    message.push(c);
+                }}
         }
         messagevec.push(message);
     }
